@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>BitcoinWeather</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --brand:#0B2545; --brand-soft:#1C3D6C;
+    --green:#16a34a; --red:#dc2626;
+    --line:rgba(255,255,255,.45);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,system-ui,Arial;color:#f8fafc;background:#000}
+
+  .bg{position:fixed; inset:0; z-index:-2; overflow:hidden}
+  .bg video{width:100%;height:100%;object-fit:cover; opacity:.72}
+  .overlay{position:fixed; inset:0; z-index:-1;
+    background:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.30))}
+
+  header{
+    position:sticky; top:0; z-index:20;
+    display:flex; justify-content:space-between; align-items:center;
+    padding:8px 16px; background:#fff; border-bottom:1px solid #e5e7eb;
+  }
+  .brand{display:flex; align-items:center; gap:6px}
+  .brand-box{background:var(--brand-soft); padding:6px; border-radius:8px; display:flex; align-items:center}
+  .brand-box img{height:28px}
+  .brand span{color:#0b1b2e; font-weight:800; font-size:16px}
+  header nav a{margin-left:12px; color:#0b1b2e; text-decoration:none; font-size:14px}
+  header nav a:hover{text-decoration:underline}
+
+  main{max-width:760px;margin:0 auto;padding:0 16px 32px}
+
+  .hero{color:#fff; text-align:center; padding:44px 0 12px}
+  .coinline{display:flex; align-items:center; gap:12px; justify-content:center; margin-bottom:4px}
+  .coinline .btclogo{width:54px;height:54px}
+  .coinname{font-size:26px; font-weight:800}
+  .mood{font-size:13px; color:#f1f5f9}
+
+  .priceRow{display:flex; align-items:center; justify-content:center; gap:12px}
+  .big{font-size:50px; font-weight:800; letter-spacing:.2px}
+  .badge{font-size:13px; font-weight:800; padding:6px 10px; border-radius:8px}
+  .badge.pos{background:rgba(22,163,74,.95); color:#fff}
+  .badge.neg{background:rgba(220,38,38,.95); color:#fff}
+  .hl{margin-top:8px; font-size:13px; color:#f8fafc}
+  .hl span{color:#fff; font-weight:800}
+
+  .outlook{margin:14px auto 0; max-width:640px; color:#fff; font-size:14px; line-height:1.55; text-align:center}
+
+  .section{margin-top:24px; color:#fff}
+  .bar{display:flex; align-items:center; gap:12px; color:#ffffff; font-size:14px; letter-spacing:.2px}
+  .bar .line{height:1px; background:var(--line); flex:1}
+  .bar .title{white-space:nowrap}
+
+  .list{margin-top:6px; max-width:640px; margin-left:auto; margin-right:auto;}
+  .row{display:flex; align-items:center; gap:10px; padding:12px 2px; border-bottom:1px solid var(--line); color:#ffffff}
+  .row:last-child{border-bottom:none}
+
+  .dt{flex:0 0 190px; font-size:17px; font-weight:700; color:#ffffff;
+      font-variant-numeric: tabular-nums; font-feature-settings:"tnum" 1, "lnum" 1;}
+  .wx{width:32px; text-align:center; font-size:22px}
+  .price{flex:1; text-align:right; font-weight:700; color:#ffffff; font-size:18px;
+         font-variant-numeric: tabular-nums; font-feature-settings:"tnum" 1, "lnum" 1;}
+  .pctBadge{flex:0 0 92px; text-align:center; font-size:14px; font-weight:700; border-radius:8px; padding:6px 0; color:#fff}
+  .pctBadge.pos{background:rgba(22,163,74,.95)}
+  .pctBadge.neg{background:rgba(220,38,38,.95)}
+
+  footer{margin:26px 0 38px; color:#f1f5f9; font-size:12px; text-align:center}
+  footer a{color:#fff; text-decoration:none}
+  footer a:hover{text-decoration:underline}
+</style>
+</head>
+<body>
+  <div class="bg"><video id="bgVideo" autoplay loop muted playsinline></video></div>
+  <div class="overlay"></div>
+
+  <header>
+    <div class="brand">
+      <div class="brand-box"><img src="./my_logo.png" alt="Logo"></div>
+      <span>BitcoinWeather</span>
+    </div>
+    <nav>
+      <a href="./index.html">Home</a>
+      <a href="./how.html">How it works</a>
+      <a href="./about.html">About</a>
+      <a href="./contact.html">Contact</a>
+      <a href="./privacy.html">Privacy</a>
+      <a href="./disclaimer.html">Disclaimer</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="coinline">
+        <img class="btclogo" src="https://upload.wikimedia.org/wikipedia/commons/4/46/Bitcoin.svg" alt="BTC">
+        <div>
+          <div class="coinname">Bitcoin</div>
+          <div class="mood" id="moodLabel">Serene</div>
+        </div>
+      </div>
+      <div class="priceRow">
+        <div class="big" id="priceBig">$--</div>
+        <div id="changeBadge" class="badge">0.00%</div>
+      </div>
+      <div class="hl">H: <span id="hVal">--</span> · L: <span id="lVal">--</span></div>
+      <p id="outlook" class="outlook">Loading short-term outlook…</p>
+    </section>
+
+    <!-- Forecast sections (3,7,30,60,90,180,360 days) -->
+    <section class="section"><div class="bar"><div class="line"></div><div class="title">Prediction for next 3 Days</div><div class="line"></div></div><div class="list" id="list3"></div></section>
+    <section class="section"><div class="bar"><div class="line"></div><div class="title">Prediction for next 7 Days</div><div class="line"></div></div><div class="list" id="list7"></div></section>
+    <section class="section"><div class="bar"><div class="line"></div><div class="title">Prediction for next 30 Days</div><div class="line"></div></div><div class="list" id="list30"></div></section>
+    <section class="section"><div class="bar"><div class="line"></div><div class="title">Prediction for next 60 Days</div><div class="line"></div></div><div class="list" id="list60"></div></section>
+    <section class="section"><div class="bar"><div class="line"></div><div class="title">Prediction for next 90 Days</div><div class="line"></div></div><div class="list" id="list90"></div></section>
+    <section class="section"><div class="bar"><div class="line"></div><div class="title">Prediction for next 180 Days</div><div class="line"></div></div><div class="list" id="list180"></div></section>
+    <section class="section"><div class="bar"><div class="line"></div><div class="title">Prediction for next 360 Days</div><div class="line"></div></div><div class="list" id="list360"></div></section>
+  </main>
+
+  <footer>
+    © <span id="year"></span> BitcoinWeather — Informational only, not investment advice. · 
+    <a href="./privacy.html">Privacy</a> · <a href="./disclaimer.html">Disclaimer</a> · <a href="./contact.html">Contact</a>
+  </footer>
+
+<script>
+  const SYMBOL='BTCUSDT';
+  const videos={ very_good:'background_video_very_good.mp4', good:'background_video_good.mp4', neutral:'background_video_neutral.mp4', bad:'background_video_bad.mp4', very_bad:'background_video_very_bad.mp4' };
+  const pickVideo = p => (p>=5)?videos.very_good:(p>=0.5)?videos.good:(p>-0.5)?videos.neutral:(p>-3)?videos.bad:videos.very_bad;
+  const moodText = p => (p>=5)?'Euphoric':(p>=0.5)?'Serene':(p>-0.5)?'Calm':(p>-3)?'Cloudy':'Rainy';
+  const fmtUSD0   = n => n.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0,minimumFractionDigits:0});
+  const fmtUSD0No = n => n.toLocaleString('en-US',{maximumFractionDigits:0,minimumFractionDigits:0});
+
+  (function wsLive(){
+    const el=document.getElementById('priceBig');
+    try{
+      const ws=new WebSocket('wss://stream.binance.com:9443/ws/btcusdt@trade');
+      ws.onmessage=e=>{ const p=parseFloat(JSON.parse(e.data).p); if(isFinite(p)) el.textContent=fmtUSD0(p); };
+      ws.onclose=()=>setTimeout(wsLive,3000);
+    }catch{}
+  })();
+
+  async function load24h(){
+    const badge=document.getElementById('changeBadge');
+    const h=document.getElementById('hVal'); const l=document.getElementById('lVal');
+    const mood=document.getElementById('moodLabel');
+    try{
+      const r=await fetch('https://api.binance.com/api/v3/ticker/24hr?symbol='+SYMBOL);
+      const j=await r.json(); const pct=parseFloat(j.priceChangePercent);
+      const cls=pct>=0?'pos':'neg'; const arrow=pct>=0?'▲ ':'▼ ';
+      badge.className='badge '+cls; badge.textContent=arrow+Math.abs(pct).toFixed(2)+'%';
+      h.textContent=fmtUSD0(parseFloat(j.highPrice)); l.textContent=fmtUSD0(parseFloat(j.lowPrice));
+      document.getElementById('bgVideo').src=pickVideo(pct);
+      mood.textContent=moodText(pct);
+    }catch{
+      badge.className='badge'; badge.textContent='n/a'; document.getElementById('bgVideo').src=videos.neutral;
+    }
+  }
+  load24h();
+
+  const LOOKBACK=46;
+  const GROUPS = { three:[1,2,3], seven:[7], thirty:[30], sixty:[60], ninety:[90], oneeighty:[180], threesixty:[360]};
+  const NEED=Math.max(...Object.values(GROUPS).flat())+LOOKBACK+5;
+
+  async function fetchCloses(n){
+    try{
+      const url=`https://api.binance.com/api/v3/klines?symbol=${SYMBOL}&interval=1d&limit=${n+2}`;
+      const res=await fetch(url); const k=await res.json(); const now=Date.now();
+      const closed=k.filter(r=>r[6]<=now).map(r=>({ts:r[6], close:parseFloat(r[4])}));
+      const pr=await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${SYMBOL}`);
+      const live=parseFloat((await pr.json()).price);
+      const arr=closed.slice(-(n+1)); arr[arr.length-1]={ts:Date.now(), close:live};
+      return arr;
+    }catch{return []}
+  }
+  function makeForecast(closes, days){
+    const last=closes[closes.length-1].close, asOf=closes[closes.length-1].ts;
+    const W=LOOKBACK, denom=W*(W+1)/2;
+    return days.map(m=>{
+      let num=0;
+      for(let i=1;i<=W;i++){
+        const a=(closes.length-1)-i, b=(closes.length-1)-i-m;
+        if(a<0||b<0) continue;
+        const ct_i=closes[a].close, ct_im=closes[b].close;
+        if(!(ct_i>0&&ct_im>0)) continue;
+        num += Math.log(1+(ct_i-ct_im)/ct_im) * (W-i);
+      }
+      const R=num/denom, factor=Math.exp(R), price=last*factor, pct=(factor-1)*100;
+      const date=new Date(asOf+m*864e5).toLocaleDateString('en-US',{month:'short', day:'2-digit', year:'numeric'});
+      return { m, date, price, pct };
+    });
+  }
+  const moodIconFor = pct => (pct>=5)?'🚀':(pct>=0.5)?'☀️':(pct>-0.5)?'⛅️':(pct>-3)?'☁️':'🌧️';
+  function rowHTML(x){
+    const arrow=x.pct>=0?'▲ ':'▼ ', cls=x.pct>=0?'pos':'neg';
+    return `<div class="row">
+      <div class="dt">${x.date}</div>
+      <div class="wx">${moodIconFor(x.pct)}</div>
+      <div class="price">$${fmtUSD0No(x.price)}</div>
+      <div class="pctBadge ${cls}">${arrow}${Math.abs(x.pct).toFixed(2)}%</div>
+    </div>`;
+  }
+
+  function writeOutlook(short3AvgPct, weekPct){
+    const out=document.getElementById('outlook');
+    const tone3 = short3AvgPct>=1 ? 'optimistic with brighter skies ahead'
+                 : short3AvgPct>=0.2 ? 'steady with calm conditions'
+                 : short3AvgPct>-0.2 ? 'largely calm and balanced'
+                 : short3AvgPct>-1 ? 'showing signs of clouds moving in'
+                 : 'turning stormy with possible showers';
+    const weekTone = weekPct>=1 ? 'further clear skies'
+                    : weekPct>-1 ? 'mixed conditions'
+                    : 'extended periods of clouds';
+
+    out.textContent =
+      `In the short term, the market outlook appears ${tone3}. ` +
+      `Over the week, forecasts point to ${weekTone} around ${Math.abs(weekPct).toFixed(2)}%. ` +
+      `As always, occasional storms cannot be ruled out.`;
+  }
+
+  async function run(){
+    try{
+      const closes=await fetchCloses(NEED);
+      const g3   = makeForecast(closes, GROUPS.three);
+      const g7   = makeForecast(closes, GROUPS.seven);
+      const g30  = makeForecast(closes, GROUPS.thirty);
+      const g60  = makeForecast(closes, GROUPS.sixty);
+      const g90  = makeForecast(closes, GROUPS.ninety);
+      const g180 = makeForecast(closes, GROUPS.oneeighty);
+      const g360 = makeForecast(closes, GROUPS.threesixty);
+
+      document.getElementById('list3').innerHTML   = g3.map(rowHTML).join('');
+      document.getElementById('list7').innerHTML   = g7.map(rowHTML).join('');
+      document.getElementById('list30').innerHTML  = g30.map(rowHTML).join('');
+      document.getElementById('list60').innerHTML  = g60.map(rowHTML).join('');
+      document.getElementById('list90').innerHTML  = g90.map(rowHTML).join('');
+      document.getElementById('list180').innerHTML = g180.map(rowHTML).join('');
+      document.getElementById('list360').innerHTML = g360.map(rowHTML).join('');
+
+      const avg3 = g3.reduce((s,x)=>s+x.pct,0)/g3.length;
+      const wPct = g7[0]?.pct ?? 0;
+      writeOutlook(avg3, wPct);
+
+      document.getElementById('year').textContent = new Date().getFullYear();
+    }catch(e){console.error(e);}
+  }
+  run();
+</script>
+</body>
+</html>
