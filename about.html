@@ -2,491 +2,110 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-<title>BitcoinWeather</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>BitcoinWeather – About</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --brand:#0B2545; --green:#16a34a; --red:#dc2626; --line:rgba(255,255,255,.45);
-    --shot-scale:1;
-    --shot-maxw:560px; /* schmaler für iPhone 16 Pro Portrait */
+    --brand:#0B2545; --brand-soft:#1C3D6C;
+    --text:#0b1b2e; --muted:#475569; --line:#e5e7eb; --bg:#ffffff;
   }
   *{box-sizing:border-box}
-  html,body{height:100%}
-  body{margin:0;font-family:Inter,system-ui,Arial;color:#f8fafc;background:#000;overflow-x:hidden}
+  body{margin:0;font-family:Inter,system-ui,Arial;color:var(--text);background:var(--bg)}
 
-  /* Background video */
-  .bg{position:fixed; inset:0; z-index:-2; overflow:hidden}
-  .bg video{width:100%;height:100%;object-fit:cover; opacity:.72}
-  .overlay{position:fixed; inset:0; z-index:-1; background:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.30))}
-
-  /* Header */
   header{
-    position:sticky; top:0; z-index:20;
+    position:sticky; top:0; z-index:10;
     display:flex; justify-content:space-between; align-items:center;
-    padding:8px 16px; background:#fff; border-bottom:1px solid #e5e7eb;
+    padding:8px 16px; background:#fff; border-bottom:1px solid var(--line);
   }
-  .brand{display:flex; align-items:center; gap:6px}
+  .brand{display:flex; align-items:center; gap:8px}
   .brand-box{background:var(--brand); padding:6px; border-radius:8px; display:flex; align-items:center}
   .brand-box img{height:28px}
   .brand span{color:#0b1b2e; font-weight:800; font-size:16px}
   header nav a{margin-left:12px; color:#0b1b2e; text-decoration:none; font-size:14px}
   header nav a:hover{text-decoration:underline}
 
-  /* Main canvas (wird im Screenshot-Mode skaliert) */
-  main{max-width:760px;margin:0 auto;padding:0 16px 48px; transform-origin: top center}
-  body.screenshot main{
-    max-width:var(--shot-maxw);
-    padding-left:18px; padding-right:18px;
-    transform:scale(var(--shot-scale));
-  }
+  main{max-width:860px; margin:0 auto; padding:40px 20px 60px}
+  h1{font-size:34px; font-weight:800; margin:0 0 20px; text-align:center}
+  h2{font-size:22px; margin:40px 0 12px}
+  p{line-height:1.7; color:#111827; margin:0 0 16px}
 
-  /* Hero */
-  .hero{color:#fff; text-align:center; padding:44px 0 12px}
-  body.screenshot .hero{padding-top:68px}
-  .coinline{display:flex; align-items:center; gap:12px; justify-content:center; margin-bottom:4px}
-  .coinline .btclogo{width:54px;height:54px}
-  .coinname{font-size:26px; font-weight:800}
-  .mood{font-size:13px; color:#f1f5f9}
+  .hero{display:flex; flex-direction:column; align-items:center; margin-bottom:40px}
+  .hero-logo{background:var(--brand); padding:24px; border-radius:24px; margin-bottom:20px}
+  .hero-logo img{height:80px; width:auto; display:block}
+  .hero p{max-width:620px; text-align:center; font-size:18px; color:#334155}
 
-  .priceRow{display:flex; align-items:center; justify-content:center; gap:12px}
-  .big{font-size:50px; font-weight:800; letter-spacing:.2px}
-  body.screenshot .big{font-size:58px}
-  .badge{font-size:13px; font-weight:800; padding:6px 10px; border-radius:8px}
-  .badge.pos{background:rgba(22,163,74,.95); color:#fff}
-  .badge.neg{background:rgba(220,38,38,.95); color:#fff}
-  .hl{margin-top:8px; font-size:13px; color:#f8fafc}
-  .hl span{color:#fff; font-weight:800}
+  section{margin-top:20px}
+  .highlight{font-weight:600; color:var(--brand)}
 
-  .outlook{margin:14px auto 0; max-width:640px; color:#fff; font-size:14px; line-height:1.55; text-align:center}
-  body.screenshot .outlook{max-width:var(--shot-maxw)}
-
-  /* Sections & list */
-  .section{margin-top:24px; color:#fff}
-  .bar{display:flex; align-items:center; gap:12px; color:#ffffff; font-size:14px; letter-spacing:.2px}
-  .bar .line{height:1px; background:var(--line); flex:1}
-  .bar .title{white-space:nowrap}
-
-  .list{margin-top:6px; max-width:640px; margin-left:auto; margin-right:auto;}
-  body.screenshot .list{max-width:var(--shot-maxw)}
-  .row{display:flex; align-items:center; gap:10px; padding:12px 2px; border-bottom:1px solid var(--line); color:#ffffff}
-  .row:last-child{border-bottom:none}
-
-  .dt{flex:0 0 190px; font-size:17px; font-weight:700; color:#ffffff;
-      font-variant-numeric: tabular-nums; font-feature-settings:"tnum" 1, "lnum" 1;}
-  .wx{width:32px; text-align:center; font-size:22px}
-  .price{flex:1; text-align:right; font-weight:700; color:#ffffff; font-size:18px;
-         font-variant-numeric: tabular-nums; font-feature-settings:"tnum" 1, "lnum" 1;}
-  .pctBadge{flex:0 0 92px; text-align:center; font-size:14px; font-weight:700; border-radius:8px; padding:6px 0; color:#fff}
-  .pctBadge.pos{background:rgba(22,163,74,.95)}
-  .pctBadge.neg{background:rgba(220,38,38,.95)}
-  body.screenshot .row{font-size:19px}
-
-  /* Tweet helper */
-  .tweetBox{
-    margin:28px auto 0; max-width:640px;
-    background:rgba(0,0,0,.22);
-    border:1px solid rgba(255,255,255,.28);
-    border-radius:12px; padding:12px;
-    backdrop-filter: blur(4px);
-  }
-  .tweetBox h3{margin:0 0 8px; font-size:16px; color:#fff; text-align:center}
-  .tw-actions{display:flex; gap:8px; flex-wrap:wrap; justify-content:center; align-items:center; margin-bottom:8px}
-  .tw-actions .btn{min-width:160px}
-  .tw-actions small{color:#e2e8f0; width:100%; text-align:center}
-  textarea#tweet-text{
-    width:100%; min-height:150px; resize:vertical;
-    background:rgba(0,0,0,.15); color:#fff; border:1px solid rgba(255,255,255,.25);
-    border-radius:10px; padding:10px; font-family:Inter,system-ui,Arial; font-size:14px; line-height:1.5;
-  }
-  .btn{background:#fff; color:#0b1b2e; border:none; padding:10px 12px; border-radius:8px; font-weight:700; cursor:pointer}
-  .btn:hover{opacity:.92}
-
-  footer{margin:26px 0 42px; color:#f1f5f9; font-size:12px; text-align:center}
-  footer a{color:#fff; text-decoration:none}
+  footer{margin:28px 0 42px; color:#475569; font-size:12px; text-align:center}
+  footer a{color:#0b1b2e; text-decoration:none}
   footer a:hover{text-decoration:underline}
-
-  /* Screenshot Mode (optimized + watermark + disclaimer) */
-  body.screenshot header, body.screenshot footer, body.screenshot .tweetBox{display:none}
-  body.screenshot .overlay{background:rgba(0,0,0,0.40)}
-  /* Watermark + Disclaimer bottom-right */
-  .shot-watermark{
-    position:fixed; right:14px; bottom:calc(14px + env(safe-area-inset-bottom,0px)); z-index:40;
-    display:none; align-items:center; gap:10px;
-    padding:8px 12px; border-radius:999px;
-    background:rgba(0,0,0,.35); border:1px solid rgba(255,255,255,.25);
-    color:#fff; backdrop-filter: blur(4px);
-  }
-  .shot-watermark img{width:28px;height:28px; opacity:.9}
-  .shot-watermark small{opacity:.9; font-size:12px; white-space:nowrap}
-  body.screenshot .shot-watermark{display:flex}
-
-  /* Floating Exit button */
-  .fab-exit{
-    position:fixed; right:16px; bottom:62px; z-index:50;
-    display:none; align-items:center; gap:8px;
-    background:#ffffff; color:#0b1b2e; border:1px solid #dbe3ef;
-    padding:10px 12px; border-radius:999px; font-weight:800; cursor:pointer;
-    box-shadow:0 6px 24px rgba(0,0,0,.25);
-  }
-  .fab-exit span{font-size:14px}
-  body.screenshot .fab-exit{display:flex}
 </style>
 </head>
 <body>
-  <div class="bg"><video id="bgVideo" autoplay loop muted playsinline src="background_video_neutral.mp4"></video></div>
-  <div class="overlay"></div>
 
-  <header>
-    <div class="brand">
-      <div class="brand-box"><img src="./my_logo.png" alt="Logo"></div>
-      <span>BitcoinWeather</span>
+<header>
+  <div class="brand">
+    <div class="brand-box"><img src="./my_logo.png" alt="Logo"></div>
+    <span>BitcoinWeather</span>
+  </div>
+  <nav>
+    <a href="./index.html">Home</a>
+    <a href="./how.html">How it works</a>
+    <a href="./about.html">About</a>
+    <a href="./contact.html">Contact</a>
+    <a href="./privacy.html">Privacy</a>
+    <a href="./disclaimer.html">Disclaimer</a>
+  </nav>
+</header>
+
+<main>
+  <div class="hero">
+    <div class="hero-logo">
+      <img src="./my_logo.png" alt="BitcoinWeather logo">
     </div>
-    <nav>
-      <a href="./index.html">Home</a>
-      <a href="./how.html">How it works</a>
-      <a href="./about.html">About</a>
-      <a href="./contact.html">Contact</a>
-      <a href="./privacy.html">Privacy</a>
-      <a href="./disclaimer.html">Disclaimer</a>
-    </nav>
-  </header>
-
-  <main id="shotCanvas">
-    <!-- HERO -->
-    <section class="hero">
-      <div class="coinline">
-        <img class="btclogo" src="https://upload.wikimedia.org/wikipedia/commons/4/46/Bitcoin.svg" alt="BTC">
-        <div>
-          <div class="coinname">Bitcoin</div>
-          <div class="mood" id="moodLabel">Cloudy</div>
-        </div>
-      </div>
-      <div class="priceRow">
-        <!-- BTC-Logo neben dem Preis entfernt -->
-        <div class="big" id="priceBig">$--</div>
-        <div id="changeBadge" class="badge">0.00%</div>
-      </div>
-      <div class="hl">H: <span id="hVal">--</span> · L: <span id="lVal">--</span></div>
-      <p id="outlook" class="outlook">Loading short-term outlook…</p>
-    </section>
-
-    <!-- Forecast sections -->
-    <section class="section"><div class="bar"><div class="line"></div><div class="title">Prediction for next 3 Days</div><div class="line"></div></div><div class="list" id="list3"></div></section>
-    <section class="section"><div class="bar"><div class="line"></div><div class="title">Prediction for next 7 Days</div><div class="line"></div></div><div class="list" id="list7"></div></section>
-    <section class="section"><div class="bar"><div class="line"></div><div class="title">Prediction for next 30 Days</div><div class="line"></div></div><div class="list" id="list30"></div></section>
-    <section class="section"><div class="bar"><div class="line"></div><div class="title">Prediction for next 60 Days</div><div class="line"></div></div><div class="list" id="list60"></div></section>
-    <section class="section"><div class="bar"><div class="line"></div><div class="title">Prediction for next 90 Days</div><div class="line"></div></div><div class="list" id="list90"></div></section>
-    <section class="section"><div class="bar"><div class="line"></div><div class="title">Prediction for next 180 Days</div><div class="line"></div></div><div class="list" id="list180"></div></section>
-    <section class="section"><div class="bar"><div class="line"></div><div class="title">Prediction for next 360 Days</div><div class="line"></div></div><div class="list" id="list360"></div></section>
-
-    <!-- Tweet helper -->
-    <section class="tweetBox">
-      <h3>Tweet this Forecast</h3>
-      <div class="tw-actions">
-        <button class="btn" id="copyBtn">Copy text</button>
-        <button class="btn" id="shareBtn">Share (iOS/Android)</button>
-        <button class="btn" id="openTwitterBtn">Open in Twitter</button>
-        <button class="btn" id="screenshotBtn">Toggle Screenshot Mode</button>
-        <small>Tip: Take a screenshot in Screenshot Mode, then add it to your tweet.</small>
-      </div>
-      <textarea id="tweet-text" readonly>Generating…</textarea>
-    </section>
-  </main>
-
-  <footer>
-    © <span id="year"></span> BitcoinWeather — Informational only, not investment advice. · 
-    <a href="./privacy.html">Privacy</a> · <a href="./disclaimer.html">Disclaimer</a> · <a href="./contact.html">Contact</a>
-  </footer>
-
-  <!-- Watermark + Disclaimer (only in screenshot mode) -->
-  <div class="shot-watermark" id="shotWatermark">
-    <img src="my_logo.png" alt="Logo">
-    <small>Informational only · Not financial advice</small>
+    <h1>About BitcoinWeather</h1>
+    <p>
+      BitcoinWeather turns complex statistical forecasts into a <strong>clear and friendly design</strong>. 
+      Like a weather app, you can instantly see where Bitcoin might head in the next days and months.
+    </p>
   </div>
 
-  <!-- Floating exit for screenshot mode -->
-  <button class="fab-exit" id="exitScreenshotFab" title="Exit Screenshot Mode">⬅︎ <span>Exit Screenshot</span></button>
+  <section>
+    <h2>Introduction</h2>
+    <p>
+      BitcoinWeather makes Bitcoin forecasts <span class="highlight">easy to understand</span> for everyone.
+      With its simple design you can view the forecast up to 360 days ahead without needing to study charts or technical analysis.
+    </p>
+  </section>
+
+  <section>
+    <h2>Our Vision</h2>
+    <p>
+      We believe that <strong>Bitcoin analysis</strong> should be accessible and transparent. 
+      Our innovative interface makes it incredibly fast and efficient to learn about future price developments. 
+      And the best part: BitcoinWeather is and will remain <strong>completely free of charge</strong>.
+    </p>
+  </section>
+
+  <section>
+    <h2>Innovation</h2>
+    <p>
+      Forget conventional chart overload. BitcoinWeather combines <span class="highlight">solid statistical methods</span> 
+      with the familiar style of a weather forecast. The result: a modern, elegant way to see the outlook for Bitcoin at a glance.
+    </p>
+  </section>
+</main>
+
+<footer>
+  © <span id="year"></span> BitcoinWeather — Informational only, not investment advice. ·
+  <a href="./privacy.html">Privacy</a> · <a href="./disclaimer.html">Disclaimer</a> · <a href="./contact.html">Contact</a>
+</footer>
 
 <script>
-  const SYMBOL='BTCUSDT';
-  const videos={
-    very_good:'background_video_very_good.mp4',
-    good:'background_video_good.mp4',
-    neutral:'background_video_neutral.mp4',
-    bad:'background_video_bad.mp4',
-    very_bad:'background_video_very_bad.mp4'
-  };
-
-  // ---- thresholds (per your spec) ----
-  const TH_VERY_GOOD = 5.0;   // > +5%
-  const TH_GOOD      = 2.0;   // > +2%
-  const TH_NEUTRAL   = -1.0;  // > -1%
-  const TH_VERY_BAD  = -5.0;  // < -5%
-
-  function pickVideo(p){
-    if (p > TH_VERY_GOOD) return videos.very_good;   // 🚀
-    if (p > TH_GOOD)      return videos.good;        // ☀️
-    if (p > TH_NEUTRAL)   return videos.neutral;     // ⛅️
-    if (p < TH_VERY_BAD)  return videos.very_bad;    // ⛈️
-    return videos.bad;                                 // 🌧️  (-5% <= p <= -1%)
-  }
-  function moodText(p){
-    if (p > TH_VERY_GOOD) return 'Euphoric';
-    if (p > TH_GOOD)      return 'Sunny';
-    if (p > TH_NEUTRAL)   return 'Cloudy';
-    if (p < TH_VERY_BAD)  return 'Thunderstorm';
-    return 'Rainy';
-  }
-  function moodIconFor(p){
-    if (p > TH_VERY_GOOD) return '🚀';
-    if (p > TH_GOOD)      return '☀️';
-    if (p > TH_NEUTRAL)   return '⛅️';
-    if (p < TH_VERY_BAD)  return '⛈️';
-    return '🌧️';
-  }
-
-  const fmtUSD0   = n => n.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0,minimumFractionDigits:0});
-  const fmtUSD0No = n => n.toLocaleString('en-US',{maximumFractionDigits:0,minimumFractionDigits:0});
-
-  // Year
   document.getElementById('year').textContent = new Date().getFullYear();
-
-  // Live price via WebSocket + fallback via REST once
-  (function wsLive(){
-    const el=document.getElementById('priceBig');
-    let gotFirst=false;
-    try{
-      const ws=new WebSocket('wss://stream.binance.com:9443/ws/btcusdt@trade');
-      ws.onmessage=e=>{
-        const p=parseFloat(JSON.parse(e.data).p);
-        if(isFinite(p)){ el.textContent=fmtUSD0(p); gotFirst=true; }
-      };
-      ws.onclose=()=>setTimeout(wsLive,3000);
-      setTimeout(async ()=>{
-        if(!gotFirst){
-          try{
-            const r=await fetch('https://api.binance.com/api/v3/ticker/price?symbol='+SYMBOL);
-            const j=await r.json(); const p=parseFloat(j.price);
-            if(isFinite(p)) el.textContent=fmtUSD0(p);
-          }catch{}
-        }
-      },2000);
-    }catch{}
-  })();
-
-  // 24h stats + background video/mood
-  async function load24h(){
-    const badge=document.getElementById('changeBadge');
-    const h=document.getElementById('hVal'); const l=document.getElementById('lVal');
-    const mood=document.getElementById('moodLabel');
-    const vid=document.getElementById('bgVideo');
-    try{
-      const r=await fetch('https://api.binance.com/api/v3/ticker/24hr?symbol='+SYMBOL);
-      const j=await r.json(); const pct=parseFloat(j.priceChangePercent);
-      const cls=pct>=0?'pos':'neg'; const arrow=pct>=0?'▲ ':'▼ ';
-      badge.className='badge '+cls; badge.textContent=arrow+Math.abs(pct).toFixed(2)+'%';
-      h.textContent=fmtUSD0(parseFloat(j.highPrice)); l.textContent=fmtUSD0(parseFloat(j.lowPrice));
-      vid.src=pickVideo(pct);
-      mood.textContent=moodText(pct);
-    }catch{
-      badge.className='badge'; badge.textContent='n/a';
-    }
-  }
-  load24h();
-
-  // Forecast calculation (46-day weighted log-returns)
-  const LOOKBACK=46;
-  const GROUPS = { three:[1,2,3], seven:[7], thirty:[30], sixty:[60], ninety:[90], oneeighty:[180], threesixty:[360]};
-  const NEED=Math.max(...Object.values(GROUPS).flat())+LOOKBACK+5;
-
-  async function fetchCloses(n){
-    try{
-      const url=`https://api.binance.com/api/v3/klines?symbol=${SYMBOL}&interval=1d&limit=${n+2}`;
-      const res=await fetch(url); const k=await res.json(); const now=Date.now();
-      const closed=k.filter(r=>r[6]<=now).map(r=>({ts:r[6], close:parseFloat(r[4])}));
-      const pr=await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${SYMBOL}`);
-      const live=parseFloat((await pr.json()).price);
-      const arr=closed.slice(-(n+1)); arr[arr.length-1]={ts:Date.now(), close:live};
-      return arr;
-    }catch(e){ console.error(e); return []; }
-  }
-
-  function makeForecast(closes, days){
-    const last=closes[closes.length-1].close, asOf=closes[closes.length-1].ts;
-    const W=LOOKBACK, denom=W*(W+1)/2;
-    return days.map(m=>{
-      let num=0;
-      for(let i=1;i<=W;i++){
-        const a=(closes.length-1)-i, b=(closes.length-1)-i-m;
-        if(a<0||b<0) continue;
-        const ct_i=closes[a].close, ct_im=closes[b].close;
-        if(!(ct_i>0&&ct_im>0)) continue;
-        num += Math.log(1+(ct_i-ct_im)/ct_im) * (W-i);
-      }
-      const R=num/denom, factor=Math.exp(R), price=last*factor, pct=(factor-1)*100;
-      const date=new Date(asOf+m*864e5).toLocaleDateString('en-US',{month:'short', day:'2-digit', year:'numeric'});
-      return { m, date, price, pct };
-    });
-  }
-
-  function rowHTML(x){
-    const arrow=x.pct>=0?'▲ ':'▼ '; const cls=x.pct>=0?'pos':'neg';
-    return `<div class="row">
-      <div class="dt">${x.date}</div>
-      <div class="wx">${moodIconFor(x.pct)}</div>
-      <div class="price">$${fmtUSD0No(x.price)}</div>
-      <div class="pctBadge ${cls}">${arrow}${Math.abs(x.pct).toFixed(2)}%</div>
-    </div>`;
-  }
-
-  function writeOutlook(short3AvgPct, weekPct){
-    const out=document.getElementById('outlook');
-    const tone3 = short3AvgPct>1 ? 'optimistic with brighter skies ahead'
-                 : short3AvgPct>0.2 ? 'steady with calm conditions'
-                 : short3AvgPct>-0.2 ? 'largely calm and balanced'
-                 : short3AvgPct>-1 ? 'showing signs of clouds moving in'
-                 : 'turning stormy with possible showers';
-    const weekTone = weekPct>1 ? 'further clear skies'
-                    : weekPct>-1 ? 'mixed conditions'
-                    : 'extended periods of clouds';
-    out.textContent =
-      `In the short term, the market outlook appears ${tone3}. ` +
-      `Over the week, forecasts point to ${weekTone} around ${Math.abs(weekPct).toFixed(2)}%. ` +
-      `As always, occasional storms cannot be ruled out.`;
-  }
-
-  function buildTweet({current, g7, g30, g90, g180, g360}){
-    const today = new Date().toLocaleDateString('en-US',{month:'short', day:'numeric', year:'numeric'});
-    const g7p = g7?.pct ?? 0;
-    // Map to emoji using same thresholds
-    const mood  = (g7p > TH_VERY_GOOD) ? '🚀' : (g7p > TH_GOOD) ? '☀️' : (g7p > TH_NEUTRAL) ? '⛅️' : (g7p < TH_VERY_BAD) ? '⛈️' : '🌧️';
-    const lines = [
-      `${mood} BitcoinWeather Forecast – ${today}`,
-      `Current Price: ${fmtUSD0(current)}`,
-      `+7d: ${fmtUSD0(g7.price)} (${(g7.pct>=0?'+':'-')}${Math.abs(g7.pct).toFixed(2)}%)`,
-      `+30d: ${fmtUSD0(g30.price)} (${(g30.pct>=0?'+':'-')}${Math.abs(g30.pct).toFixed(2)}%)`,
-      `+90d: ${fmtUSD0(g90.price)} (${(g90.pct>=0?'+':'-')}${Math.abs(g90.pct).toFixed(2)}%)`,
-      `+180d: ${fmtUSD0(g180.price)} (${(g180.pct>=0?'+':'-')}${Math.abs(g180.pct).toFixed(2)}%)`,
-      `+360d: ${fmtUSD0(g360.price)} (${(g360.pct>=0?'+':'-')}${Math.abs(g360.pct).toFixed(2)}%)`,
-      ``,
-      `📊 #Bitcoin #BTC #Crypto #CryptoForecast #BitcoinWeather #CryptoMarkets`
-    ];
-    return lines.join('\n');
-  }
-
-  // Actions
-  function copyTextToClipboard(text){
-    if(navigator.clipboard){ return navigator.clipboard.writeText(text); }
-    const ta=document.createElement('textarea'); ta.value=text; document.body.appendChild(ta);
-    ta.select(); document.execCommand('copy'); document.body.removeChild(ta); return Promise.resolve();
-  }
-
-  document.getElementById('copyBtn').addEventListener('click', async ()=>{
-    const txt=document.getElementById('tweet-text').value;
-    await copyTextToClipboard(txt);
-    const btn=document.getElementById('copyBtn'); const old=btn.textContent; btn.textContent='Copied ✔'; setTimeout(()=>btn.textContent=old,1200);
-  });
-
-  document.getElementById('shareBtn').addEventListener('click', async ()=>{
-    const txt=document.getElementById('tweet-text').value;
-    if(navigator.share){ try{ await navigator.share({ text: txt }); }catch(e){} }
-    else{ window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent(txt),'_blank'); }
-  });
-
-  document.getElementById('openTwitterBtn').addEventListener('click', ()=>{
-    const txt=document.getElementById('tweet-text').value;
-    window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent(txt),'_blank');
-  });
-
-  // Screenshot mode toggle + auto-scale for iPhone 16 Pro portrait
-  const shotBtn = document.getElementById('screenshotBtn');
-  const exitFab = document.getElementById('exitScreenshotFab');
-
-  function adjustShotScale(){
-    // Inhaltshöhe ermitteln (nur Main, Header/Footer sind im Shot ausgeblendet)
-    const main = document.querySelector('main');
-    const h = main.getBoundingClientRect().height;
-    const availH = window.innerHeight - 4; // etwas Luft
-    let s = Math.min(1, availH / h);
-    // zusätzliche Sicherheitsmarge
-    s = Math.max(0.72, Math.min(1, s*0.985));
-    document.documentElement.style.setProperty('--shot-scale', s.toFixed(3));
-    window.scrollTo(0,0);
-  }
-
-  function enterShot(){
-    document.body.classList.add('screenshot');
-    adjustShotScale();
-  }
-  function exitShot(){
-    document.body.classList.remove('screenshot');
-    document.documentElement.style.removeProperty('--shot-scale');
-    window.scrollTo(0,0);
-  }
-
-  shotBtn.addEventListener('click', ()=>{
-    if(document.body.classList.contains('screenshot')) exitShot();
-    else enterShot();
-  });
-  exitFab.addEventListener('click', exitShot);
-  window.addEventListener('resize', ()=>{ if(document.body.classList.contains('screenshot')) adjustShotScale(); });
-  window.addEventListener('orientationchange', ()=>{ if(document.body.classList.contains('screenshot')) setTimeout(adjustShotScale,250); });
-
-  // Main run
-  async function run(){
-    try{
-      const closes=await fetchCloses(NEED);
-      if(!closes.length) throw new Error('No closes');
-
-      const g3   = makeForecast(closes, GROUPS.three);
-      const g7   = makeForecast(closes, GROUPS.seven);
-      const g30  = makeForecast(closes, GROUPS.thirty);
-      const g60  = makeForecast(closes, GROUPS.sixty);
-      const g90  = makeForecast(closes, GROUPS.ninety);
-      const g180 = makeForecast(closes, GROUPS.oneeighty);
-      const g360 = makeForecast(closes, GROUPS.threesixty);
-
-      document.getElementById('list3').innerHTML   = g3.map(rowHTML).join('');
-      document.getElementById('list7').innerHTML   = g7.map(rowHTML).join('');
-      document.getElementById('list30').innerHTML  = g30.map(rowHTML).join('');
-      document.getElementById('list60').innerHTML  = g60.map(rowHTML).join('');
-      document.getElementById('list90').innerHTML  = g90.map(rowHTML).join('');
-      document.getElementById('list180').innerHTML = g180.map(rowHTML).join('');
-      document.getElementById('list360').innerHTML = g360.map(rowHTML).join('');
-
-      // Outlook text
-      const avg3 = g3.reduce((s,x)=>s+x.pct,0)/g3.length;
-      const wPct = g7[0]?.pct ?? 0;
-      writeOutlook(avg3, wPct);
-
-      // Tweet text
-      const current = closes[closes.length-1]?.close ?? 0;
-      document.getElementById('tweet-text').value = buildTweet({
-        current,
-        g7: g7[0], g30: g30[0], g90: g90[0], g180: g180[0], g360: g360[0]
-      });
-    }catch(e){
-      console.error(e);
-      ['list3','list7','list30','list60','list90','list180','list360']
-        .forEach(id=>document.getElementById(id).innerHTML='<div class="row"><div class="dt">Forecast unavailable</div></div>');
-      document.getElementById('tweet-text').value = 'Tweet unavailable — reload the page.';
-    }
-  }
-  run();
-
-  // Data helpers
-  async function fetchCloses(n){
-    try{
-      const url=`https://api.binance.com/api/v3/klines?symbol=${SYMBOL}&interval=1d&limit=${n+2}`;
-      const res=await fetch(url); const k=await res.json(); const now=Date.now();
-      const closed=k.filter(r=>r[6]<=now).map(r=>({ts:r[6], close:parseFloat(r[4])}));
-      const pr=await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${SYMBOL}`);
-      const live=parseFloat((await pr.json()).price);
-      const arr=closed.slice(-(n+1)); arr[arr.length-1]={ts:Date.now(), close:live};
-      return arr;
-    }catch(e){ console.error(e); return []; }
-  }
 </script>
+
 </body>
 </html>
