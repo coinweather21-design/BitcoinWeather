@@ -40,6 +40,7 @@
   .mood{font-size:13px; color:#f1f5f9}
 
   .priceRow{display:flex; align-items:center; justify-content:center; gap:12px}
+  .btcmid{width:40px;height:40px}
   .big{font-size:50px; font-weight:800; letter-spacing:.2px}
   .badge{font-size:13px; font-weight:800; padding:6px 10px; border-radius:8px}
   .badge.pos{background:rgba(22,163,74,.95); color:#fff}
@@ -148,6 +149,7 @@
         </div>
       </div>
       <div class="priceRow">
+        <img class="btcmid" src="https://upload.wikimedia.org/wikipedia/commons/4/46/Bitcoin.svg" alt="BTC">
         <div class="big" id="priceBig">$--</div>
         <div id="changeBadge" class="badge">0.00%</div>
       </div>
@@ -196,38 +198,38 @@
     very_bad:'background_video_very_bad.mp4'
   };
 
-  /* Neue Skala:
-     Very good: > 5%  (🚀)
-     Good:      > 3%  (☀️)
-     Neutral:   > -0.5% (⛅️)
-     Bad:       < -0.5% (🌧️)
-     Very bad:  < -5% (⛈️) */
+  // ---- thresholds (new) ----
+  const TH_VERY_GOOD = 5.0;   // > +5%
+  const TH_GOOD      = 2.0;   // > +2%
+  const TH_NEUTRAL   = -1.0;  // > -1%
+  const TH_VERY_BAD  = -5.0;  // < -5%
+
   function pickVideo(p){
-    if (p > 5) return videos.very_good;
-    if (p > 3) return videos.good;
-    if (p > -0.5) return videos.neutral;
-    if (p < -5) return videos.very_bad;
-    return videos.bad; // -5% <= p <= -0.5%
+    if (p > TH_VERY_GOOD) return videos.very_good;   // 🚀
+    if (p > TH_GOOD)      return videos.good;        // ☀️
+    if (p > TH_NEUTRAL)   return videos.neutral;     // ⛅️
+    if (p < TH_VERY_BAD)  return videos.very_bad;    // ⛈️
+    return videos.bad;                                 // 🌧️  (-5% <= p <= -1%)
   }
   function moodText(p){
-    if (p > 5) return 'Euphoric';
-    if (p > 3) return 'Sunny';
-    if (p > -0.5) return 'Cloudy';
-    if (p < -5) return 'Thunderstorm';
+    if (p > TH_VERY_GOOD) return 'Euphoric';
+    if (p > TH_GOOD)      return 'Sunny';
+    if (p > TH_NEUTRAL)   return 'Cloudy';
+    if (p < TH_VERY_BAD)  return 'Thunderstorm';
     return 'Rainy';
   }
   function moodIconFor(p){
-    if (p > 5) return '🚀';
-    if (p > 3) return '☀️';
-    if (p > -0.5) return '⛅️';
-    if (p < -5) return '⛈️';
+    if (p > TH_VERY_GOOD) return '🚀';
+    if (p > TH_GOOD)      return '☀️';
+    if (p > TH_NEUTRAL)   return '⛅️';
+    if (p < TH_VERY_BAD)  return '⛈️';
     return '🌧️';
   }
 
   const fmtUSD0   = n => n.toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0,minimumFractionDigits:0});
   const fmtUSD0No = n => n.toLocaleString('en-US',{maximumFractionDigits:0,minimumFractionDigits:0});
 
-  // Set year
+  // Year
   document.getElementById('year').textContent = new Date().getFullYear();
 
   // Live price via WebSocket + fallback via REST once
@@ -238,19 +240,14 @@
       const ws=new WebSocket('wss://stream.binance.com:9443/ws/btcusdt@trade');
       ws.onmessage=e=>{
         const p=parseFloat(JSON.parse(e.data).p);
-        if(isFinite(p)){
-          el.textContent=fmtUSD0(p);
-          gotFirst=true;
-        }
+        if(isFinite(p)){ el.textContent=fmtUSD0(p); gotFirst=true; }
       };
       ws.onclose=()=>setTimeout(wsLive,3000);
-      // Fallback price fetch after 2s if no WS yet
       setTimeout(async ()=>{
         if(!gotFirst){
           try{
             const r=await fetch('https://api.binance.com/api/v3/ticker/price?symbol='+SYMBOL);
-            const j=await r.json();
-            const p=parseFloat(j.price);
+            const j=await r.json(); const p=parseFloat(j.price);
             if(isFinite(p)) el.textContent=fmtUSD0(p);
           }catch{}
         }
@@ -274,7 +271,6 @@
       mood.textContent=moodText(pct);
     }catch{
       badge.className='badge'; badge.textContent='n/a';
-      // neutral video is set as default in markup
     }
   }
   load24h();
@@ -343,7 +339,7 @@
   function buildTweet({current, g7, g30, g90, g180, g360}){
     const today = new Date().toLocaleDateString('en-US',{month:'short', day:'numeric', year:'numeric'});
     const g7p = g7?.pct ?? 0;
-    const mood  = (g7p > 5) ? '🚀' : (g7p > 3) ? '☀️' : (g7p > -0.5) ? '⛅️' : (g7p < -5) ? '⛈️' : '🌧️';
+    const mood  = (g7p > TH_VERY_GOOD) ? '🚀' : (g7p > TH_GOOD) ? '☀️' : (g7p > TH_NEUTRAL) ? '⛅️' : (g7p < TH_VERY_BAD) ? '⛈️' : '🌧️';
     const lines = [
       `${mood} BitcoinWeather Forecast – ${today}`,
       `Current Price: ${fmtUSD0(current)}`,
@@ -429,19 +425,6 @@
     }
   }
   run();
-
-  // Helpers
-  async function fetchCloses(n){
-    try{
-      const url=`https://api.binance.com/api/v3/klines?symbol=${SYMBOL}&interval=1d&limit=${n+2}`;
-      const res=await fetch(url); const k=await res.json(); const now=Date.now();
-      const closed=k.filter(r=>r[6]<=now).map(r=>({ts:r[6], close:parseFloat(r[4])}));
-      const pr=await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${SYMBOL}`);
-      const live=parseFloat((await pr.json()).price);
-      const arr=closed.slice(-(n+1)); arr[arr.length-1]={ts:Date.now(), close:live};
-      return arr;
-    }catch(e){ console.error(e); return []; }
-  }
 </script>
 </body>
 </html>
