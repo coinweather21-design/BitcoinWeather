@@ -2,15 +2,18 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <title>BitcoinWeather</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
     --brand:#0B2545; --green:#16a34a; --red:#dc2626; --line:rgba(255,255,255,.45);
+    --shot-scale:1;
+    --shot-maxw:560px; /* schmaler für iPhone 16 Pro Portrait */
   }
   *{box-sizing:border-box}
-  body{margin:0;font-family:Inter,system-ui,Arial;color:#f8fafc;background:#000}
+  html,body{height:100%}
+  body{margin:0;font-family:Inter,system-ui,Arial;color:#f8fafc;background:#000;overflow-x:hidden}
 
   /* Background video */
   .bg{position:fixed; inset:0; z-index:-2; overflow:hidden}
@@ -30,18 +33,25 @@
   header nav a{margin-left:12px; color:#0b1b2e; text-decoration:none; font-size:14px}
   header nav a:hover{text-decoration:underline}
 
-  main{max-width:760px;margin:0 auto;padding:0 16px 48px}
+  /* Main canvas (wird im Screenshot-Mode skaliert) */
+  main{max-width:760px;margin:0 auto;padding:0 16px 48px; transform-origin: top center}
+  body.screenshot main{
+    max-width:var(--shot-maxw);
+    padding-left:18px; padding-right:18px;
+    transform:scale(var(--shot-scale));
+  }
 
   /* Hero */
   .hero{color:#fff; text-align:center; padding:44px 0 12px}
+  body.screenshot .hero{padding-top:68px}
   .coinline{display:flex; align-items:center; gap:12px; justify-content:center; margin-bottom:4px}
   .coinline .btclogo{width:54px;height:54px}
   .coinname{font-size:26px; font-weight:800}
   .mood{font-size:13px; color:#f1f5f9}
 
   .priceRow{display:flex; align-items:center; justify-content:center; gap:12px}
-  .btcmid{width:40px;height:40px}
   .big{font-size:50px; font-weight:800; letter-spacing:.2px}
+  body.screenshot .big{font-size:58px}
   .badge{font-size:13px; font-weight:800; padding:6px 10px; border-radius:8px}
   .badge.pos{background:rgba(22,163,74,.95); color:#fff}
   .badge.neg{background:rgba(220,38,38,.95); color:#fff}
@@ -49,6 +59,7 @@
   .hl span{color:#fff; font-weight:800}
 
   .outlook{margin:14px auto 0; max-width:640px; color:#fff; font-size:14px; line-height:1.55; text-align:center}
+  body.screenshot .outlook{max-width:var(--shot-maxw)}
 
   /* Sections & list */
   .section{margin-top:24px; color:#fff}
@@ -57,6 +68,7 @@
   .bar .title{white-space:nowrap}
 
   .list{margin-top:6px; max-width:640px; margin-left:auto; margin-right:auto;}
+  body.screenshot .list{max-width:var(--shot-maxw)}
   .row{display:flex; align-items:center; gap:10px; padding:12px 2px; border-bottom:1px solid var(--line); color:#ffffff}
   .row:last-child{border-bottom:none}
 
@@ -68,6 +80,7 @@
   .pctBadge{flex:0 0 92px; text-align:center; font-size:14px; font-weight:700; border-radius:8px; padding:6px 0; color:#fff}
   .pctBadge.pos{background:rgba(22,163,74,.95)}
   .pctBadge.neg{background:rgba(220,38,38,.95)}
+  body.screenshot .row{font-size:19px}
 
   /* Tweet helper */
   .tweetBox{
@@ -93,23 +106,24 @@
   footer a{color:#fff; text-decoration:none}
   footer a:hover{text-decoration:underline}
 
-  /* Screenshot Mode (optimized for iPhone/Twitter) */
+  /* Screenshot Mode (optimized + watermark + disclaimer) */
   body.screenshot header, body.screenshot footer, body.screenshot .tweetBox{display:none}
-  body.screenshot main{padding-left:24px;padding-right:24px}
   body.screenshot .overlay{background:rgba(0,0,0,0.40)}
-  body.screenshot .hero{padding-top:72px}
-  body.screenshot .hero .big{font-size:64px}
-  body.screenshot .list{margin-top:10px}
-  body.screenshot .row{font-size:20px}
-  /* Watermark logo bottom-right */
-  body.screenshot::after{
-    content:""; position:fixed; right:20px; bottom:calc(20px + env(safe-area-inset-bottom,0px)); z-index:4;
-    width:92px; height:92px; background:url('my_logo.png') no-repeat center/contain; opacity:.28; pointer-events:none;
+  /* Watermark + Disclaimer bottom-right */
+  .shot-watermark{
+    position:fixed; right:14px; bottom:calc(14px + env(safe-area-inset-bottom,0px)); z-index:40;
+    display:none; align-items:center; gap:10px;
+    padding:8px 12px; border-radius:999px;
+    background:rgba(0,0,0,.35); border:1px solid rgba(255,255,255,.25);
+    color:#fff; backdrop-filter: blur(4px);
   }
+  .shot-watermark img{width:28px;height:28px; opacity:.9}
+  .shot-watermark small{opacity:.9; font-size:12px; white-space:nowrap}
+  body.screenshot .shot-watermark{display:flex}
 
-  /* Floating Exit button (visible only in screenshot mode) */
+  /* Floating Exit button */
   .fab-exit{
-    position:fixed; right:16px; bottom:16px; z-index:50;
+    position:fixed; right:16px; bottom:62px; z-index:50;
     display:none; align-items:center; gap:8px;
     background:#ffffff; color:#0b1b2e; border:1px solid #dbe3ef;
     padding:10px 12px; border-radius:999px; font-weight:800; cursor:pointer;
@@ -138,7 +152,7 @@
     </nav>
   </header>
 
-  <main>
+  <main id="shotCanvas">
     <!-- HERO -->
     <section class="hero">
       <div class="coinline">
@@ -149,7 +163,7 @@
         </div>
       </div>
       <div class="priceRow">
-        <img class="btcmid" src="https://upload.wikimedia.org/wikipedia/commons/4/46/Bitcoin.svg" alt="BTC">
+        <!-- BTC-Logo neben dem Preis entfernt -->
         <div class="big" id="priceBig">$--</div>
         <div id="changeBadge" class="badge">0.00%</div>
       </div>
@@ -185,6 +199,12 @@
     <a href="./privacy.html">Privacy</a> · <a href="./disclaimer.html">Disclaimer</a> · <a href="./contact.html">Contact</a>
   </footer>
 
+  <!-- Watermark + Disclaimer (only in screenshot mode) -->
+  <div class="shot-watermark" id="shotWatermark">
+    <img src="my_logo.png" alt="Logo">
+    <small>Informational only · Not financial advice</small>
+  </div>
+
   <!-- Floating exit for screenshot mode -->
   <button class="fab-exit" id="exitScreenshotFab" title="Exit Screenshot Mode">⬅︎ <span>Exit Screenshot</span></button>
 
@@ -198,7 +218,7 @@
     very_bad:'background_video_very_bad.mp4'
   };
 
-  // ---- thresholds (new) ----
+  // ---- thresholds (per your spec) ----
   const TH_VERY_GOOD = 5.0;   // > +5%
   const TH_GOOD      = 2.0;   // > +2%
   const TH_NEUTRAL   = -1.0;  // > -1%
@@ -339,6 +359,7 @@
   function buildTweet({current, g7, g30, g90, g180, g360}){
     const today = new Date().toLocaleDateString('en-US',{month:'short', day:'numeric', year:'numeric'});
     const g7p = g7?.pct ?? 0;
+    // Map to emoji using same thresholds
     const mood  = (g7p > TH_VERY_GOOD) ? '🚀' : (g7p > TH_GOOD) ? '☀️' : (g7p > TH_NEUTRAL) ? '⛅️' : (g7p < TH_VERY_BAD) ? '⛈️' : '🌧️';
     const lines = [
       `${mood} BitcoinWeather Forecast – ${today}`,
@@ -378,11 +399,39 @@
     window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent(txt),'_blank');
   });
 
-  const toggleScreenshot = ()=> document.body.classList.toggle('screenshot');
-  document.getElementById('screenshotBtn').addEventListener('click', toggleScreenshot);
-  document.getElementById('exitScreenshotFab').addEventListener('click', ()=>{
-    if(document.body.classList.contains('screenshot')) document.body.classList.remove('screenshot');
+  // Screenshot mode toggle + auto-scale for iPhone 16 Pro portrait
+  const shotBtn = document.getElementById('screenshotBtn');
+  const exitFab = document.getElementById('exitScreenshotFab');
+
+  function adjustShotScale(){
+    // Inhaltshöhe ermitteln (nur Main, Header/Footer sind im Shot ausgeblendet)
+    const main = document.querySelector('main');
+    const h = main.getBoundingClientRect().height;
+    const availH = window.innerHeight - 4; // etwas Luft
+    let s = Math.min(1, availH / h);
+    // zusätzliche Sicherheitsmarge
+    s = Math.max(0.72, Math.min(1, s*0.985));
+    document.documentElement.style.setProperty('--shot-scale', s.toFixed(3));
+    window.scrollTo(0,0);
+  }
+
+  function enterShot(){
+    document.body.classList.add('screenshot');
+    adjustShotScale();
+  }
+  function exitShot(){
+    document.body.classList.remove('screenshot');
+    document.documentElement.style.removeProperty('--shot-scale');
+    window.scrollTo(0,0);
+  }
+
+  shotBtn.addEventListener('click', ()=>{
+    if(document.body.classList.contains('screenshot')) exitShot();
+    else enterShot();
   });
+  exitFab.addEventListener('click', exitShot);
+  window.addEventListener('resize', ()=>{ if(document.body.classList.contains('screenshot')) adjustShotScale(); });
+  window.addEventListener('orientationchange', ()=>{ if(document.body.classList.contains('screenshot')) setTimeout(adjustShotScale,250); });
 
   // Main run
   async function run(){
@@ -425,6 +474,19 @@
     }
   }
   run();
+
+  // Data helpers
+  async function fetchCloses(n){
+    try{
+      const url=`https://api.binance.com/api/v3/klines?symbol=${SYMBOL}&interval=1d&limit=${n+2}`;
+      const res=await fetch(url); const k=await res.json(); const now=Date.now();
+      const closed=k.filter(r=>r[6]<=now).map(r=>({ts:r[6], close:parseFloat(r[4])}));
+      const pr=await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${SYMBOL}`);
+      const live=parseFloat((await pr.json()).price);
+      const arr=closed.slice(-(n+1)); arr[arr.length-1]={ts:Date.now(), close:live};
+      return arr;
+    }catch(e){ console.error(e); return []; }
+  }
 </script>
 </body>
 </html>
