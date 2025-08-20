@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>BitcoinWeather – About</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --brand:#0B2545; --brand-soft:#1C3D6C;
+    --text:#0b1b2e; --muted:#475569; --line:#e5e7eb; --bg:#ffffff;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,system-ui,Arial;color:var(--text);background:var(--bg)}
+
+  header{
+    position:sticky; top:0; z-index:10;
+    display:flex; justify-content:space-between; align-items:center;
+    padding:8px 16px; background:#fff; border-bottom:1px solid var(--line);
+  }
+  .brand{display:flex; align-items:center; gap:8px}
+  .brand-box{background:var(--brand); padding:6px; border-radius:8px; display:flex; align-items:center}
+  .brand-box img{height:28px}
+  .brand span{color:#0b1b2e; font-weight:800; font-size:16px}
+  header nav a{margin-left:12px; color:#0b1b2e; text-decoration:none; font-size:14px}
+  header nav a:hover{text-decoration:underline}
+
+  main{max-width:860px; margin:0 auto; padding:40px 20px 60px}
+  h1{font-size:34px; font-weight:800; margin:0 0 20px; text-align:center}
+  h2{font-size:22px; margin:40px 0 12px}
+  p{line-height:1.7; color:#111827; margin:0 0 16px}
+
+  .hero{display:flex; flex-direction:column; align-items:center; margin-bottom:40px}
+  .hero-logo{background:var(--brand); padding:24px; border-radius:24px; margin-bottom:20px}
+  .hero-logo img{height:80px; width:auto; display:block}
+  .hero p{max-width:620px; text-align:center; font-size:18px; color:#334155}
+
+  section{margin-top:20px}
+  .highlight{font-weight:600; color:var(--brand)}
+
+  footer{margin:28px 0 42px; color:#475569; font-size:12px; text-align:center}
+  footer a{color:#0b1b2e; text-decoration:none}
+  footer a:hover{text-decoration:underline}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="brand-box"><img src="./my_logo.png" alt="Logo"></div>
+    <span>BitcoinWeather</span>
+  </div>
+  <nav>
+    <a href="./index.html">Home</a>
+    <a href="./how.html">How it works</a>
+    <a href="./about.html">About</a>
+    <a href="./contact.html">Contact</a>
+    <a href="./privacy.html">Privacy</a>
+    <a href="./disclaimer.html">Disclaimer</a>
+  </nav>
+</header>
+
+<main>
+  <div class="hero">
+    <div class="hero-logo">
+      <img src="./my_logo.png" alt="BitcoinWeather logo">
+    </div>
+    <h1>About BitcoinWeather</h1>
+    <p>
+      BitcoinWeather turns complex statistical forecasts into a <strong>clear and friendly design</strong>. 
+      Like a weather app, you can instantly see where Bitcoin might head in the next days and months.
+    </p>
+  </div>
+
+  <section>
+    <h2>Introduction</h2>
+    <p>
+      BitcoinWeather makes Bitcoin forecasts <span class="highlight">easy to understand</span> for everyone.
+      With its simple design you can view the forecast up to 360 days ahead without needing to study charts or technical analysis.
+    </p>
+  </section>
+
+  <section>
+    <h2>Our Vision</h2>
+    <p>
+      We believe that <strong>Bitcoin analysis</strong> should be accessible and transparent. 
+      Our innovative interface makes it incredibly fast and efficient to learn about future price developments. 
+      And the best part: BitcoinWeather is and will remain <strong>completely free of charge</strong>.
+    </p>
+  </section>
+
+  <section>
+    <h2>Innovation</h2>
+    <p>
+      Forget conventional chart overload. BitcoinWeather combines <span class="highlight">solid statistical methods</span> 
+      with the familiar style of a weather forecast. The result: a modern, elegant way to see the outlook for Bitcoin at a glance.
+    </p>
+  </section>
+</main>
+
+<footer>
+  © <span id="year"></span> BitcoinWeather — Informational only, not investment advice. ·
+  <a href="./privacy.html">Privacy</a> · <a href="./disclaimer.html">Disclaimer</a> · <a href="./contact.html">Contact</a>
+</footer>
+
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+
+</body>
+</html>

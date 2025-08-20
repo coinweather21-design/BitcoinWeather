@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>BitcoinWeather – How it works</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<!-- MathJax for formula rendering -->
+<script>
+  window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] }, svg: { fontCache: 'global' } };
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+  :root{
+    --brand:#0B2545;     /* Header/Logo-Box Blau (gleich wie About) */
+    --brand-soft:#1C3D6C;
+    --text:#0b1b2e; --muted:#475569; --line:#e5e7eb; --bg:#ffffff;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,system-ui,Arial;color:var(--text);background:var(--bg)}
+
+  /* Header – klein, Kasten nur hinter Logo */
+  header{
+    position:sticky; top:0; z-index:10;
+    display:flex; justify-content:space-between; align-items:center;
+    padding:8px 16px; background:#fff; border-bottom:1px solid var(--line);
+  }
+  .brand{display:flex; align-items:center; gap:8px}
+  .brand-box{background:var(--brand); padding:6px; border-radius:8px; display:flex; align-items:center}
+  .brand-box img{height:28px}
+  .brand span{color:#0b1b2e; font-weight:800; font-size:16px}
+  header nav a{margin-left:12px; color:#0b1b2e; text-decoration:none; font-size:14px}
+  header nav a:hover{text-decoration:underline}
+
+  /* Page */
+  main{max-width:860px; margin:0 auto; padding:40px 20px 60px}
+  h1{font-size:34px; font-weight:800; margin:0 0 20px; text-align:center}
+  h2{font-size:22px; margin:34px 0 12px}
+  p{line-height:1.75; color:#111827; margin:0 0 16px}
+  .lead{font-size:18px; color:#334155; text-align:center; max-width:720px; margin:0 auto 12px}
+
+  /* Hero */
+  .hero{display:flex; flex-direction:column; align-items:center; margin-bottom:32px}
+  .hero-logo{background:var(--brand); padding:20px; border-radius:20px; margin-bottom:16px}
+  .hero-logo img{height:70px; width:auto; display:block}
+
+  /* Subtle separators */
+  .rule{height:1px; background:var(--line); width:100%; margin:24px 0}
+
+  /* Formula blocks – sehr dezent */
+  .formula{
+    font-size:16px;
+    padding:14px 16px;
+    background:#f8fafc;
+    border:1px solid #e2e8f0;
+    border-radius:12px;
+    overflow:auto;
+    margin:10px 0 8px;
+  }
+
+  /* Two-column list on desktop */
+  .grid-2{display:grid; grid-template-columns:1fr 1fr; gap:18px}
+  .grid-2 p{margin:0}
+
+  /* Definition tags */
+  .defs{display:flex; flex-wrap:wrap; gap:10px; margin-top:8px}
+  .tag{background:#f1f5f9; border:1px solid #e2e8f0; border-radius:999px; padding:6px 10px; font-size:13px; color:#0f172a}
+
+  ul{padding-left:18px} li{margin:6px 0}
+
+  footer{margin:28px 0 42px; color:#475569; font-size:12px; text-align:center}
+  footer a{color:#0b1b2e; text-decoration:none}
+  footer a:hover{text-decoration:underline}
+
+  @media (max-width: 720px){
+    .grid-2{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="brand-box"><img src="./my_logo.png" alt="Logo"></div>
+    <span>BitcoinWeather</span>
+  </div>
+  <nav>
+    <a href="./index.html">Home</a>
+    <a href="./how.html">How it works</a>
+    <a href="./about.html">About</a>
+    <a href="./contact.html">Contact</a>
+    <a href="./privacy.html">Privacy</a>
+    <a href="./disclaimer.html">Disclaimer</a>
+  </nav>
+</header>
+
+<main>
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-logo">
+      <img src="./my_logo.png" alt="BitcoinWeather logo">
+    </div>
+    <h1>How it works</h1>
+    <p class="lead">
+      BitcoinWeather translates historical daily closing prices into a clear, weather-style outlook for Bitcoin.
+      Below you’ll find the core idea, inputs, and the exact formula we use — no black box.
+    </p>
+  </section>
+
+  <!-- Inputs -->
+  <section>
+    <h2>Inputs</h2>
+    <div class="grid-2">
+      <p><strong>Data:</strong> Daily <em>closing</em> prices of Bitcoin (UTC).</p>
+      <p><strong>Horizon:</strong> 1–360 days (e.g., 1, 7, 30, 60, 90, 180, 360).</p>
+    </div>
+    <p><strong>Lookback:</strong> A recently-weighted window of <strong>46 days</strong> gives more influence to newer data while keeping context from earlier days.</p>
+  </section>
+
+  <div class="rule"></div>
+
+  <!-- Idea -->
+  <section>
+    <h2>Idea in two steps</h2>
+    <ol>
+      <li>Compute **simple returns** and convert them to **log returns** so changes add up cleanly over time.</li>
+      <li>Aggregate log returns with a linearly decaying weight (newer days heavier), then transform back to a price level.</li>
+    </ol>
+  </section>
+
+  <!-- Step 1 -->
+  <section>
+    <h2>1) From simple to log returns</h2>
+    <p>Simple return between two closes:</p>
+    <div class="formula">
+      \( r_t \;=\; \dfrac{c_t - c_{t-1}}{\,c_{t-1}\,} \)
+    </div>
+    <p>Log return (time-additive):</p>
+    <div class="formula">
+      \( R_t \;=\; \ln\!\Big(1+\dfrac{c_t - c_{t-1}}{c_{t-1}}\Big). \)
+    </div>
+  </section>
+
+  <!-- Step 2 -->
+  <section>
+    <h2>2) Weight recent days more, then aggregate</h2>
+    <p>
+      For a horizon of \(m\) days, we compare each day \(t-i\) with the value \(m\) days earlier \(t-i-m\),
+      compute the log simple return, and weight it by \((46 - i)\).
+    </p>
+    <div class="formula">
+      \( \displaystyle
+      R_{t+m} \;=\; \frac{\sum_{i=1}^{46}\; \ln\!\Big(1+\frac{c_{t-i}-c_{t-i-m}}{c_{t-i-m}}\Big)\cdot(46-i)}{\sum_{i=1}^{46} i}
+      \)
+    </div>
+    <p class="muted">
+      Longer horizons require sufficient history. As a rule of thumb, a ≈90-day forecast needs about 115 data points (≈90 + 25).
+    </p>
+  </section>
+
+  <!-- Back to price -->
+  <section>
+    <h2>Back to a price level</h2>
+    <p>Turn the aggregated log return into a simple return and project the price:</p>
+    <div class="formula">
+      \( r_{t+m} \;=\; e^{\,R_{t+m}} \qquad\Rightarrow\qquad
+         c_{t+m} \;=\; c_t \cdot e^{\,R_{t+m}}. \)
+    </div>
+  </section>
+
+  <!-- Full formula -->
+  <section>
+    <h2>The full formula</h2>
+    <div class="formula">
+      \( \displaystyle
+      c_{t+m} \;=\; c_t \cdot \exp\!\left(
+        \frac{\sum_{i=1}^{46}\; \ln\!\Big(1+\frac{c_{t-i}-c_{t-i-m}}{c_{t-i-m}}\Big)\cdot(46-i)}{\sum_{i=1}^{46} i}
+      \right)
+      \)
+    </div>
+    <div class="defs">
+      <span class="tag">\(r\) = simple return</span>
+      <span class="tag">\(R\) = log return</span>
+      <span class="tag">\(t\) = time (current day)</span>
+      <span class="tag">\(m\) = horizon (days)</span>
+      <span class="tag">\(i\) = counter (1…46)</span>
+      <span class="tag">\(c\) = closing price</span>
+    </div>
+  </section>
+
+  <div class="rule"></div>
+
+  <!-- Notes -->
+  <section>
+    <h2>Notes & assumptions</h2>
+    <ul>
+      <li>We use daily <em>closing</em> prices; intraday spikes are not directly used in the weighting.</li>
+      <li>For presentation on the homepage the forecast is shown as both absolute price and % change.</li>
+      <li>All projections are informational — <strong>not financial advice</strong>.</li>
+    </ul>
+  </section>
+</main>
+
+<footer>
+  © <span id="year"></span> BitcoinWeather — Informational only, not investment advice. ·
+  <a href="./privacy.html">Privacy</a> · <a href="./disclaimer.html">Disclaimer</a> · <a href="./contact.html">Contact</a>
+</footer>
+
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+
+</body>
+</html>

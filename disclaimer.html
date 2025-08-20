@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>BitcoinWeather – Disclaimer</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--brand:#0B2545;--text:#0b1b2e;--line:#e5e7eb;--bg:#ffffff;}
+  body{margin:0;font-family:Inter,system-ui,Arial;color:var(--text);background:var(--bg)}
+  header{position:sticky;top:0;z-index:10;display:flex;justify-content:space-between;align-items:center;padding:8px 16px;background:#fff;border-bottom:1px solid var(--line)}
+  .brand{display:flex;align-items:center;gap:8px}
+  .brand-box{background:var(--brand);padding:6px;border-radius:8px}
+  .brand-box img{height:28px}
+  .brand span{color:#0b1b2e;font-weight:800;font-size:16px}
+  header nav a{margin-left:12px;color:#0b1b2e;text-decoration:none;font-size:14px}
+  header nav a:hover{text-decoration:underline}
+  main{max-width:800px;margin:0 auto;padding:40px 20px 60px}
+  h1{text-align:center;font-size:32px;font-weight:800;margin-bottom:28px}
+  h2{margin-top:28px;font-size:20px}
+  p{line-height:1.7;margin:12px 0;color:#111827}
+  footer{margin:28px 0 42px;color:#475569;font-size:12px;text-align:center}
+  footer a{color:#0b1b2e;text-decoration:none}
+  footer a:hover{text-decoration:underline}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="brand-box"><img src="./my_logo.png" alt="Logo"></div>
+    <span>BitcoinWeather</span>
+  </div>
+  <nav>
+    <a href="./index.html">Home</a>
+    <a href="./how.html">How it works</a>
+    <a href="./about.html">About</a>
+    <a href="./contact.html">Contact</a>
+    <a href="./privacy.html">Privacy</a>
+    <a href="./disclaimer.html">Disclaimer</a>
+  </nav>
+</header>
+
+<main>
+  <h1>Disclaimer</h1>
+  <p>The information on BitcoinWeather is provided for general informational purposes only. It does not constitute investment advice.</p>
+
+  <h2>No Investment Advice</h2>
+  <p>Forecasts and data are generated automatically from statistical methods applied to historical prices. They are not predictions or guarantees. You should not rely on these forecasts for investment decisions.</p>
+
+  <h2>Accuracy of Information</h2>
+  <p>We make efforts to ensure accuracy, but BitcoinWeather does not guarantee that any forecast or information is free of errors or omissions.</p>
+
+  <h2>Limitation of Liability</h2>
+  <p>BitcoinWeather, its operators and contributors shall not be held liable for any losses or damages resulting from the use of the information provided on this site.</p>
+
+  <h2>External Links</h2>
+  <p>Links to third-party websites are provided for convenience. BitcoinWeather has no control over such sites and is not responsible for their content or privacy practices.</p>
+</main>
+
+<footer>
+  © <span id="year"></span> BitcoinWeather — Informational only, not investment advice.
+</footer>
+<script>document.getElementById('year').textContent=new Date().getFullYear();</script>
+</body>
+</html>

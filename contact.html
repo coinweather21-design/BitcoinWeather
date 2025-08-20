@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>BitcoinWeather – Contact</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--brand:#0B2545; --text:#0b1b2e; --line:#e5e7eb; --bg:#ffffff;}
+  body{margin:0;font-family:Inter,system-ui,Arial;color:var(--text);background:var(--bg)}
+  header{position:sticky;top:0;z-index:10;display:flex;justify-content:space-between;align-items:center;padding:8px 16px;background:#fff;border-bottom:1px solid var(--line)}
+  .brand{display:flex;align-items:center;gap:8px}
+  .brand-box{background:var(--brand);padding:6px;border-radius:8px}
+  .brand-box img{height:28px}
+  .brand span{color:#0b1b2e;font-weight:800;font-size:16px}
+  header nav a{margin-left:12px;color:#0b1b2e;text-decoration:none;font-size:14px}
+  header nav a:hover{text-decoration:underline}
+  main{max-width:640px;margin:0 auto;padding:40px 20px 60px}
+  h1{text-align:center;font-size:32px;font-weight:800;margin:0 0 24px}
+  p{text-align:center;color:#475569;margin-bottom:28px}
+  form{display:flex;flex-direction:column;gap:16px}
+  input,textarea{font:inherit;padding:12px;border:1px solid #d1d5db;border-radius:8px}
+  textarea{min-height:120px}
+  button{background:var(--brand);color:#fff;border:none;padding:12px;border-radius:8px;font-weight:600;cursor:pointer}
+  button:hover{background:#14355c}
+  footer{margin:28px 0 42px;color:#475569;font-size:12px;text-align:center}
+  footer a{color:#0b1b2e;text-decoration:none}
+  footer a:hover{text-decoration:underline}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="brand-box"><img src="./my_logo.png" alt="Logo"></div>
+    <span>BitcoinWeather</span>
+  </div>
+  <nav>
+    <a href="./index.html">Home</a>
+    <a href="./how.html">How it works</a>
+    <a href="./about.html">About</a>
+    <a href="./contact.html">Contact</a>
+    <a href="./privacy.html">Privacy</a>
+    <a href="./disclaimer.html">Disclaimer</a>
+  </nav>
+</header>
+
+<main>
+  <h1>Contact us</h1>
+  <p>Do you have questions, feedback or suggestions? Please get in touch using the form below.</p>
+  <form action="mailto:CoinWeather21@gmail.com" method="post" enctype="text/plain">
+    <input type="text" name="name" placeholder="Your Name" required>
+    <input type="email" name="email" placeholder="Your Email" required>
+    <textarea name="message" placeholder="Your Message" required></textarea>
+    <button type="submit">Send Message</button>
+  </form>
+</main>
+
+<footer>
+  © <span id="year"></span> BitcoinWeather — Informational only, not investment advice.
+</footer>
+<script>document.getElementById('year').textContent=new Date().getFullYear();</script>
+</body>
+</html>
